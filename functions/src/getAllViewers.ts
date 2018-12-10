@@ -19,7 +19,8 @@ const getAllViewers = async (
       viewersCount: 0,
       viewers: [],
       notFollowMe: [],
-      notFollowMeCount: 0
+      notFollowMeCount: 0,
+      me
     };
   }
 
@@ -33,7 +34,8 @@ const getAllViewers = async (
     viewersCount,
     viewers,
     notFollowMe,
-    notFollowMeCount
+    notFollowMeCount,
+    me
   };
 };
 
