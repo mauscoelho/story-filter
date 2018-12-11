@@ -1,7 +1,8 @@
 import * as functions from "firebase-functions";
+import * as cors from "cors";
 import getAllViewers from "./getAllViewers";
 
-const cors = require("cors")({ origin: true });
+const corsHandler = cors({ origin: true });
 
 interface Auth {
   username: string;
@@ -9,22 +10,27 @@ interface Auth {
   index: number;
 }
 
-export const helloWorld = functions.https.onRequest((request, response) => {
-  return cors(request, response, async () => {
-    if (request.method !== "POST") {
-      return response.status(401).json({
-        message: "Not allowed"
-      });
-    }
+export const ping = functions.https.onRequest((request, response) => {
+  corsHandler(request, response, () => {
+    response.send(
+      `Ping from Firebase (with CORS handling)! ${new Date().toISOString()}`
+    );
+  });
+});
 
+export const viewers = functions.https.onRequest(async (request, response) => {
+  return corsHandler(request, response, async () => {
     const auth: Auth = request.body;
 
-    const result = await getAllViewers(
-      auth.username,
-      auth.password,
-      auth.index
-    );
-
-    return response.send(result);
+    try {
+      const result = await getAllViewers(
+        auth.username,
+        auth.password,
+        auth.index
+      );
+      return response.send(result);
+    } catch (err) {
+      return response.status(500).send({ message: err.toString() });
+    }
   });
 });
