@@ -1,13 +1,19 @@
 import * as functions from "firebase-functions";
 import * as cors from "cors";
 import getAllViewers from "./getAllViewers";
+import getMyStories from "./getMyStories";
 
 const corsHandler = cors({ origin: true });
 
-interface Auth {
+interface ViewerInput {
   username: string;
   password: string;
   index: number;
+}
+
+interface StoriesInput {
+  username: string;
+  password: string;
 }
 
 export const ping = functions.https.onRequest((request, response) => {
@@ -20,14 +26,27 @@ export const ping = functions.https.onRequest((request, response) => {
 
 export const viewers = functions.https.onRequest(async (request, response) => {
   return corsHandler(request, response, async () => {
-    const auth: Auth = request.body;
+    const input: ViewerInput = request.body;
 
     try {
       const result = await getAllViewers(
-        auth.username,
-        auth.password,
-        auth.index
+        input.username,
+        input.password,
+        input.index
       );
+      return response.send(result);
+    } catch (err) {
+      return response.status(500).send({ message: err.toString() });
+    }
+  });
+});
+
+export const stories = functions.https.onRequest(async (request, response) => {
+  return corsHandler(request, response, async () => {
+    const input: StoriesInput = request.body;
+
+    try {
+      const result = await getMyStories(input.username, input.password);
       return response.send(result);
     } catch (err) {
       return response.status(500).send({ message: err.toString() });
