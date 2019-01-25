@@ -26,7 +26,8 @@ const getAllViewers = async (
 
   const storyId = stories[0]._params.items[storyIndex].id;
   const viewersCount = stories[0]._params.items[storyIndex].viewer_count;
-  const viewers = await getViewers(session, storyId);
+  const allViewers = await getViewersById(session, storyId);
+  const viewers = mapToViewer(allViewers);
   const notFollowMe = await getViewersNotFollowMe(session, viewers, me);
   const notFollowMeCount = notFollowMe.length;
 
@@ -41,17 +42,19 @@ const getAllViewers = async (
 
 export default getAllViewers;
 
-async function getViewers(session: any, storyId: any) {
+export async function getViewersById(session: any, storyId: any) {
   const storyViewers = await new Instagram.V1.Feed.StoryViewers(
     session,
     storyId
   );
-  const allViewers = await storyViewers.all();
-  const viewers = mapToViewer(allViewers);
-  return viewers;
+  return await storyViewers.all();
 }
 
-async function getViewersNotFollowMe(session: any, viewers: any, me: any) {
+export async function getViewersNotFollowMe(
+  session: any,
+  viewers: any,
+  me: any
+) {
   const followersPromise = await new Instagram.V1.Feed.AccountFollowers(
     session,
     me
@@ -63,7 +66,7 @@ async function getViewersNotFollowMe(session: any, viewers: any, me: any) {
   return notFollowMe;
 }
 
-function mapToViewer(users: any) {
+export function mapToViewer(users: any) {
   return users.map(user => ({
     id: user._params.id,
     username: user._params.username,
